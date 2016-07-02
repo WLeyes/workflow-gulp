@@ -11,18 +11,4 @@
 * Ruby
 
 
-# One-time Setup
-##### This is for my own reference only - not required once on Github
-
-### Node
-* npm install -g gulp
-* npm install -g browserify
-* npm init
-
-### Ruby
-* gem update
-* gem install sass
-* gem install compass
-
-
 
