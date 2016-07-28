@@ -10,5 +10,9 @@
 * Node
 * Ruby
 
-
+# Installation
+ * cmd window: npm install
+ 
+# Post Installation
+* cmd window: gulp
 
