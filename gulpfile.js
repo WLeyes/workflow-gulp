@@ -1,9 +1,13 @@
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
     compass = require('gulp-compass'),
+    minifyCSS = require('gulp-minify-css'),
+    minifyHTML = require('gulp-htmlmin'),
     connect = require('gulp-connect'),
     browserify = require('gulp-browserify'),
     coffee = require('gulp-coffee'),
+    gulpif = require('gulp-if'),
+    uglify= require('gulp-uglify'),
     concat = require('gulp-concat');
 
 
@@ -14,6 +18,7 @@ var env,
     sassSources,
     htmlSources,
     jsonSources,
+    sassStyle,
     outputDIR;
 
 htmlSources = [outputDIR+'*.html'];
@@ -24,17 +29,19 @@ jsSources =[
     'components/scripts/*.js',
     'components/scripts/pixgrid.js',
     'components/scripts/tagline.js',
-    'components/scripts/template.js'
-];
+    'components/scripts/template.js'];
 
-env = process.env.NODE_ENV || 'development'; // options: 'development', 'treehouse', 'production'
+env = process.env.NODE_ENV || 'production'; // options: 'development', 'treehouse', 'production'
 
-if(env==='development'){
+if(env === 'development'){
     outputDIR = 'builds/development/'; // output development environment
-} else if (env==='treehouse'){
+    sassStyle = 'expanded';
+} else if (env === 'treehouse'){
     outputDIR = 'builds/treehouse/';// output treehouse github format
+    sassStyle = 'expanded';
 } else{
     outputDIR = 'builds/production/'; // output production server environment
+    sassStyle = 'compressed';
 }
 
 
@@ -52,6 +59,7 @@ gulp.task('js', function () {
    gulp.src(jsSources)
        .pipe(concat('script.js'))
        .pipe(browserify())
+       .pipe(gulpif(env === 'production', uglify()))
        .pipe(gulp.dest(outputDIR+'js'))
        .pipe(connect.reload())
 });
@@ -63,9 +71,10 @@ gulp.task('compass', function () {
         .pipe(compass({
             sass: 'components/sass',
             image: outputDIR+'images',
-            style: 'expanded'
+            style: sassStyle
         }))
         .on('error', gutil.log)
+        .pipe(gulpif(env === 'production', minifyCSS()))
         .pipe(gulp.dest(outputDIR+'css'))
         .pipe(connect.reload())
 });
@@ -76,7 +85,7 @@ gulp.task('watch', function () {
     gulp.watch(coffeeSources, ['coffee']);
     gulp.watch(jsSources, ['js']);
     gulp.watch('components/sass/*.scss', ['compass']);
-    gulp.watch(htmlSources, ['html']);
+    gulp.watch('builds/development/*.html', ['html']);
     gulp.watch(jsonSources, ['json']);
 });
 
@@ -92,7 +101,9 @@ gulp.task('connect', function() {
 
 
 gulp.task('html', function () {
-    gulp.src(htmlSources)
+    gulp.src('builds/development/*.html')
+    .pipe(gulpif(env === 'production', minifyHTML({collapseWhitespace: true})))
+    .pipe(gulpif(env === 'production', gulp.dest(outputDIR)))
     .pipe(connect.reload())
 });
 

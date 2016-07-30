@@ -14,5 +14,7 @@
  * cmd window: npm install
  
 # Post Installation
-* cmd window: gulp
+* $ SET NODE_ENV=production // or development
+* $ gulp
+
 
